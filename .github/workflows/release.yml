@@ -1,0 +1,47 @@
+name: Version Release
+on:
+  release:
+    types: [released]
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+
+jobs:
+
+  release-docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}/vospace
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: generate short hash
+        run: echo BUILD_SHA="${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the existing image for this commit
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_SHA }}
+
+      - name: Create the new tag
+        run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_SHA }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_TAG }}
+
+      - name: Push the new tag
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_TAG }}
+      
+      - name: Create the latest tag
+        run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_SHA }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      
+      - name: Push the latest tag
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Cleanup left over docker data
+        run: rm -rf ~/.docker

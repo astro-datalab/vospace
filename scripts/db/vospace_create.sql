@@ -1,19 +1,4 @@
 --
--- Drop all the existing tables
---
-
-DROP TABLE IF EXISTS `properties`;
-DROP TABLE IF EXISTS `addl_props`;
-DROP TABLE IF EXISTS `capabilities`;
-DROP TABLE IF EXISTS `jobs`;
-DROP TABLE IF EXISTS `listings`;
-DROP TABLE IF EXISTS `metaproperties`;
-DROP TABLE IF EXISTS `results`;
-DROP TABLE IF EXISTS `transfers`;
-DROP TABLE IF EXISTS `nodes`;
-DROP TABLE IF EXISTS `links`;
-
---
 -- Table structure for table `capabilities`
 --
 
@@ -41,6 +26,17 @@ CREATE TABLE `jobs` (
   `job` text,
   PRIMARY KEY (`identifier`),
   INDEX job_typ_idx (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `links`
+--
+
+CREATE TABLE `links` (
+  `identifier` varchar(4096) NOT NULL,
+  `target` varchar(4096) DEFAULT NULL,
+  KEY `lnk_id_idx` (`identifier`(250)),
+  KEY `lnk_tgt_idx` (`target`(250))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -80,15 +76,16 @@ CREATE TABLE `results` (
 --
 -- Table structure for table `transfers`
 --
-
 CREATE TABLE `transfers` (
   `identifier` int(11) NOT NULL AUTO_INCREMENT,
   `jobid` varchar(128) DEFAULT NULL,
-  `endpoint` varchar(4096) NOT NULL,
+  `rendpoint` varchar(4096) NOT NULL,
   `created` datetime DEFAULT NULL,
   `completed` datetime DEFAULT NULL,
-  PRIMARY KEY (`identifier`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`identifier`),
+  KEY `tra_rend_idx` (`rendpoint`(40)),
+  KEY `tra_jid_idx` (`jobid`)
+) ENGINE=InnoDB AUTO_INCREMENT=259176 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `nodes`
@@ -96,7 +93,7 @@ CREATE TABLE `transfers` (
 
 CREATE TABLE `nodes` (
   `identifier` varchar(4096) NOT NULL,
-  `depth` tinyint DEFAULT '-1',
+  `depth` tinyint(4) DEFAULT '-1',
   `type` tinyint(4) NOT NULL,
   `view` varchar(128) DEFAULT NULL,
   `status` smallint(6) DEFAULT '0',
@@ -104,24 +101,12 @@ CREATE TABLE `nodes` (
   `location` varchar(4096) DEFAULT NULL,
   `creationDate` datetime DEFAULT NULL,
   `lastModificationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX nod_id_idx (`identifier`(767)),
-  INDEX nod_dep_idx (`depth`),
-  INDEX nod_typ_idx (`type`),
-  INDEX nod_own_idx (`owner`),
-  INDEX nod_own_id_idx (`owner`(25), `identifier`(250)),
-  INDEX nod_own_dep_id_idx (`owner`(25), `depth`, `identifier`(250)),
-  INDEX nod_loc_idx (`location`(767))
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Table structure for table `links`
---
-
-CREATE TABLE `links` (
-  `identifier` varchar(4096) NOT NULL,
-  `target` varchar(4096) DEFAULT NULL,
-  INDEX lnk_id_idx (`identifier`(767)),
-  INDEX lnk_tgt_idx (`target`(767))
+  KEY `nod_dep_idx` (`depth`),
+  KEY `nod_typ_idx` (`type`),
+  KEY `nod_own_id_idx` (`owner`,`identifier`(250)),
+  KEY `nod_own_dep_id_idx` (`owner`,`depth`,`identifier`(250)),
+  KEY `nod_id_idx` (`identifier`(250)),
+  KEY `nod_loc_idx` (`location`(250))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -132,5 +117,5 @@ CREATE TABLE `addl_props` (
   `identifier` varchar(4096) NOT NULL,
   `property` varchar(128) NOT NULL,
   `value` varchar(256) NOT NULL,
-  INDEX add_id_idx (`identifier`(767))
+  KEY `add_id_idx` (`identifier`(767))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

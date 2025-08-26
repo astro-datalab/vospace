@@ -143,8 +143,8 @@
 		<condition property="dist.hostname" value="${hostname}" else="${computer.hostname}">
 			<isset property="hostname"/>
 		</condition>
-        <copy file="vospace.properties.${dist.hostname}" tofile="${webapp}/WEB-INF/classes/vospace.properties" overwrite="true"/>
-		<copy file="log4j.xml.${dist.hostname}" tofile="${webapp}/WEB-INF/classes/log4j.xml" overwrite="true"/>
+		<copy file="vospace.properties" tofile="${webapp}/WEB-INF/classes/vospace.properties" overwrite="true"/>
+		<copy file="log4j.xml" tofile="${webapp}/WEB-INF/classes/log4j.xml" overwrite="true"/>
 
 		<!-- Create the war file -->
 		<war destfile="${final.war}" webxml="${webapp}/WEB-INF/web.xml">
@@ -167,7 +167,7 @@
 		<condition property="dist.hostname" value="${hostname}" else="${computer.hostname}">
 			<isset property="hostname"/>
 		</condition>
-		<copy file="vospace.properties.test.${dist.hostname}" tofile="${webapp}/WEB-INF/classes/vospace.properties" overwrite="true"/>
+		<copy file="vospace.properties" tofile="${webapp}/WEB-INF/classes/vospace.properties" overwrite="true"/>
 		<copy file="log4j.xml.${dist.hostname}" tofile="${webapp}/WEB-INF/classes/log4j.xml" overwrite="true"/>
 
 		<!-- Create the war file -->

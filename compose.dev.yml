@@ -1,0 +1,39 @@
+services:
+
+  vos-api:
+    extends:
+      file: compose.yml
+      service: vos-api
+    build:
+        context: .
+        args:
+            STORAGE_USER: ${STORAGE_USER}
+            STORAGE_UID: ${STORAGE_UID}
+            STORAGE_GROUP: ${STORAGE_GROUP}
+            STORAGE_GID: ${STORAGE_GID}
+    user: ${STORAGE_USER}:${STORAGE_GROUP}  
+    env_file: .env
+    volumes:
+      - ./fixtures/vosdata/:/net/dl2/vospace/users:rw
+
+  vos-mysql:
+    extends:
+      file: compose.yml
+      service: vos-mysql
+  
+  auth-mock:
+    image: python:3.11
+    command: "/bin/bash -c 'pip install flask && python3 app.py'"
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./mocks/auth/app.py:/app/app.py
+    networks:
+      - vos-network
+
+volumes:
+  vos_mysql_data:
+
+networks:
+  vos-network:
+    driver: bridge

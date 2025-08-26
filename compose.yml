@@ -1,0 +1,37 @@
+services:
+  vos-api:
+    image: ghcr.io/astro-datalab/vospace/vospace:4686a1a
+    build:
+        args:
+            STORAGE_USER: ${STORAGE_USER}
+            STORAGE_UID: ${STORAGE_UID}
+            STORAGE_GROUP: ${STORAGE_GROUP}
+            STORAGE_GID: ${STORAGE_GID}
+    restart: unless-stopped
+    env_file: .env
+    ports:
+        - "${PUBLISH_PORT}:${PORT}"
+    depends_on:
+        - vos-mysql
+    networks:
+      - vos-network
+
+  vos-mysql:
+    restart: unless-stopped
+    image: mariadb:10.5
+    environment:
+      - MARIADB_ROOT_PASSWORD=${MYSQL_ROOT_PW}
+      - MARIADB_USER=${MYSQL_USER}
+      - MARIADB_PASSWORD=${MYSQL_PW}
+      - MARIADB_DATABASE=${MYSQL_DB_NAME}
+    volumes:
+      - vos_mysql_data:/var/lib/mysql
+    networks:
+      - vos-network
+
+volumes:
+  vos_mysql_data:
+
+networks:
+  vos-network:
+    driver: bridge

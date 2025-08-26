@@ -1,0 +1,66 @@
+name: Tests and Checks
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build local ANT image
+      run: docker build -f Dockerfile.ApacheAnt -t apache-ant .
+
+    - name: Create VOSpace Java build with ANT
+      run: docker run --name java-build -v ./java:/app apache-ant dist
+
+    - name: Make sure ANT finished successfully
+      run: docker wait java-build
+  
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build local ANT image
+      run: docker build -f Dockerfile.ApacheAnt -t apache-ant .
+
+    - name: Create Java build with ANT
+      run: docker run --rm -v ./java:/app apache-ant dist
+
+    - name: Create .env file
+      run: cp .env.example .env
+
+    - name: Create storage user
+      run: |
+        sudo groupadd --force -g "1001" "example_group" && \
+        sudo  useradd --non-unique -m -u "1001" -g "example_group" "example_owner"
+
+    - name: Update storage permissions
+      run: sudo chown -R example_owner:example_group ./fixtures/vosdata/
+
+    - name: Build VOSpace image
+      run: docker compose -f compose.dev.yml up -d --build
+
+    - name:  Wait for VOSpace to come online
+      run: |
+        curl \
+        --fail \
+        --connect-timeout 10 \
+        --retry 3 \
+        --retry-delay 5 \
+        --retry-max-time 40 \
+        --retry-all-errors \
+        -o /dev/null \
+        http://localhost:8002/vospace-2.0/vospace/
+    
+    - name: Seed database
+      run: sleep 5s && scripts/dev/seed_test_data.sh .env
+
+    - name: Run Python test suite
+      run: PUBLISH_PORT=8002 python3 -m unittest testing/test_vospace.py
