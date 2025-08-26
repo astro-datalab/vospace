@@ -11,10 +11,10 @@ backend.type.localfs=edu.caltech.vao.vospace.storage.LocalFSStorageManager
 backend.type.swift=edu.caltech.vao.vospace.storage.SwiftStorageManager
 
 # External address of HTTP data server
-server.http.url=http://gp04.datalab.noirlab.edu:8080/vospace-2.0/vospace/data
+server.http.url=https://datalab.noirlab.edu/vospace-2.0/vospace/data
 
 # External address of transfers endpoint
-server.transfer.url=http://gp04.datalab.noirlab.edu:8080/vospace-2.0/vospace/transfers
+server.transfer.url=https://datalab.noirlab.edu/vospace-2.0/vospace/transfers
 
 # External address of Datalab Authentication service
 server.auth.url=https://datalab.noirlab.edu/auth
